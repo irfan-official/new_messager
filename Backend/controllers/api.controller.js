@@ -1,0 +1,269 @@
+import { assignJWT } from "../services/auth.services.js";
+import bcrypt from "bcrypt";
+import { image as Image } from "../models/media.model.js";
+import User from "../models/user.model.js";
+import Group from "../models/group.model.js";
+import Room from "../models/room.model.js";
+import { nanoid } from "nanoid";
+import { modelTypes, roomTypes } from "../models/types.js";
+
+export const handleLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found 1",
+      });
+    }
+
+    // Verify the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid password 2",
+      });
+    }
+
+    assignJWT(res, user._id);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        userID: user._id,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error 3",
+    });
+  }
+};
+
+export const handleRegister = async (req, res) => {
+  const { firstName, lastName, email, password, image: imageURL } = req.body;
+
+  console.log("request arrive ==> ", req.body);
+
+  if (!firstName || !lastName || !email || !password || !imageURL) {
+    return res.status(400).json({
+      success: false,
+      error: "All fields are reequired",
+    });
+  }
+
+  let salt = await bcrypt.genSalt();
+  let hashPassword = await bcrypt.hash(password, salt);
+
+  try {
+    const image = await Image.create({
+      extentionType: "jpg",
+      type: "User",
+      url: imageURL,
+    });
+
+    const user = await User.create({
+      firstName,
+      lastName,
+      name: `${firstName} ${lastName}`,
+      email,
+      password: hashPassword,
+      image: image._id,
+    });
+
+    image.user = user._id;
+    await image.save();
+
+    assignJWT(res, user._id);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        userID: user._id,
+      },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+export const handleCreateGroup = async (req, res) => {
+  try {
+    const {
+      userID,
+      name,
+      groupTypes,
+      password = "",
+      image: imageURL,
+    } = req.body;
+
+    // Validate fields
+    if (!userID || !name || !groupTypes || !imageURL) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Please fill all required fields" });
+    }
+
+    // if (
+    //   groupTypes !== "Public" &&
+    //   groupTypes !== "Private" &&
+    //   groupTypes !== "ProtectedPrivate" &&
+    //   groupTypes !== "ProtectedPublic"
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: "Room type must be 'group' or 'private'",
+    //   });
+    // }
+
+    const user = await User.findById(userID);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    const image = await Image.create({
+      extentionType: "jpg",
+      type: "Group",
+      url:
+        imageURL ||
+        "https://images.unsplash.com/photo-1470753323753-3f8091bb0232?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGdyb3VwfGVufDB8fDB8fHww",
+    });
+
+    const group = await Group.create({
+      name,
+      image: image._id,
+      //room:
+      creator: user._id,
+      active: true,
+      type: "Public",
+      members: [userID],
+    });
+
+    image.group = group._id;
+    await image.save();
+
+    const createdRoom = await Room.create({
+      key: String(group._id),
+      type: roomTypes.group,
+      createdByGroup: group._id,
+      admins: [user._id],
+    });
+
+    group.room = createdRoom._id;
+    await group.save();
+
+    user.views.push({
+      index: user.views.length + 1,
+      room: createdRoom._id,
+    });
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Group create successfully",
+    });
+  } catch (error) {
+    console.error("Join room error:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+export const handleJoinGroup = async (req, res) => {
+  try {
+    const { userID, groupID, groupTypes, password = "" } = req.body;
+
+    // Validate fields
+    if (!userID || !groupID || !groupTypes) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Please fill all required fields" });
+    }
+
+    // if (
+    //   groupTypes !== "Public" &&
+    //   groupTypes !== "Private" &&
+    //   groupTypes !== "ProtectedPrivate" &&
+    //   groupTypes !== "ProtectedPublic"
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: "Room type must be 'group' or 'private'",
+    //   });
+    // }
+
+    const user = await User.findById(userID).populate({
+      path: "views.room",
+      model: modelTypes.room,
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    const group = await Group.findOne({
+      _id: groupID,
+    }).populate({
+      path: "members",
+      model: modelTypes.user,
+      select: "-password",
+    });
+
+    let room = "";
+
+    if (group) {
+      room = await Room.findOne({
+        createdByGroup: group._id,
+      });
+    }
+
+    let userAlreadyExist = false;
+    let groupAlreadyExistInViews = false;
+
+    for (let i = 0, lim = group.members.length; i < lim; i++) {
+      if (String(group.members[i]._id) == String(userID)) {
+        userAlreadyExist = true;
+        break;
+      }
+    }
+
+    for (let i = 0, lim = user.views.length; i < lim; i++) {
+      if (String(user.views[i].room._id) == String(group._id)) {
+        groupAlreadyExistInViews = true;
+        break;
+      }
+    }
+
+    console.log(`${userAlreadyExist}   ${groupAlreadyExistInViews}`);
+
+    if (!userAlreadyExist) {
+      console.log("\n check block 1 okey");
+      group.members.push(user._id);
+      await group.save();
+    }
+
+    if (!groupAlreadyExistInViews) {
+      console.log("check block 2 okey");
+      user.views.push({ room: room._id }); //here error occur
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Room joined successfully",
+    });
+  } catch (error) {
+    console.error("Join room error:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
