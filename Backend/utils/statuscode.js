@@ -1,4 +1,4 @@
-export const statusCode = {
+const statusCode = {
   // 1xx Informational
   100: "Continue",
   101: "Switching Protocols",
@@ -108,3 +108,7 @@ export const statusCode = {
   598: "Network Read Timeout Error (Unknown)",
   599: "Network Connect Timeout Error (Unknown)",
 };
+
+export default statusCode;
+
+console.log(statusCode[404]);

@@ -1,0 +1,8 @@
+0. after validate the post data
+
+1. check the user exist or not
+2. if user exist then match the password
+
+if password match then 200 ok response and redirect the "/" route
+
+if password does not match then give a response message 

@@ -1,0 +1,12 @@
+0. After validation of post data
+
+1. first check the user already exist or not
+
+if exist then return with a error (userAlready exist and redirect to the login page)
+
+if not exist then encrypt the password and store it in db
+
+order for db creation
+
+1. create user
+2. create room
