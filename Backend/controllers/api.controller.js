@@ -4,10 +4,14 @@ import { image as Image } from "../models/media.model.js";
 import User from "../models/user.model.js";
 import Group from "../models/group.model.js";
 import Room from "../models/room.model.js";
+import Views from "../models/views.model.js";
+import Activity from "../models/activity.model.js";
+import Blocked from "../models/blocked.model.js";
 import { nanoid } from "nanoid";
 import { modelTypes, roomTypes } from "../utils/types.js";
+import Response from "../utils/response.js";
 
-export const handleLogin = async (req, res) => {
+export const handleLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -46,7 +50,7 @@ export const handleLogin = async (req, res) => {
   }
 };
 
-export const handleRegister = async (req, res) => {
+export const handleRegister = async (req, res, next) => {
   const { firstName, lastName, email, password, image: imageURL } = req.body;
 
   console.log("request arrive ==> ", req.body);
@@ -97,7 +101,7 @@ export const handleRegister = async (req, res) => {
   }
 };
 
-export const handleCreateGroup = async (req, res) => {
+export const handleCreateGroup = async (req, res, next) => {
   try {
     const {
       userID,
@@ -179,7 +183,7 @@ export const handleCreateGroup = async (req, res) => {
   }
 };
 
-export const handleJoinGroup = async (req, res) => {
+export const handleJoinGroup = async (req, res, next) => {
   try {
     const { userID, groupID, groupTypes, password = "" } = req.body;
 
@@ -265,5 +269,53 @@ export const handleJoinGroup = async (req, res) => {
   } catch (error) {
     console.error("Join room error:", error);
     res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+export const searchRoomCards = async (req, res, next) => {
+  const { userID, searchValue = "" } = req.body;
+
+  if (typeof searchValue !== "string") {
+    return res
+      .status(405)
+      .json(new Response(405, "searchValue can only be string type"));
+  }
+
+  searchValue = searchValue.trim();
+
+  const cards = await Room.find({
+    name: searchValue,
+  });
+
+  return res.status(200).json(new Response(200, _, cards));
+};
+
+export const clickedRoomCard = async (req, res, next) => {
+  try {
+    const { userID, clickedRoomID, previousRoomID = "" } = req.body;
+
+    const clickedRoom = await Views.findOne({
+      user: userID,
+      room: clickedRoomID,
+    });
+
+    clickedRoom.lastCheckInTime = Date.now();
+    clickedRoom.focus = true;
+    await clickedRoom.save();
+
+    if (previousRoomID !== "") {
+      const previousRoom = await Views.findOne({
+        user: userID,
+        room: previousRoomID,
+      });
+
+      previousRoom.lastCheckOutTime = Date.now();
+      previousRoom.focus = false;
+      await previousRoom.save();
+    }
+
+    return res.status(200).json(new Response(200));
+  } catch (error) {
+    next(error);
   }
 };

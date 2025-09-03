@@ -110,5 +110,3 @@ const statusCode = {
 };
 
 export default statusCode;
-
-console.log(statusCode[404]);

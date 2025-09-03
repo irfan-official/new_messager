@@ -1,0 +1,30 @@
+Api in REST ---------------------------------------------------------------
+
+when click the room card then make a api call to backend with req data
+
+data contains current click roomID and previous roomID 
+
+in backend 
+
+1. create a activity
+2. modify the view document
+
+search the view document with userID and roomID for current clicked roomID and previous roomID
+
+< --------------------------------------------------- >
+
+for current clicked view
+
+modify the lastCheckInTime = click time
+
+modify the focus = true 
+
+< --------------------------------------------------- >
+
+for previous view
+
+modify the lastCheckOutTime = click time
+
+modify the focus = false 
+
+< --------------------------------------------------- >

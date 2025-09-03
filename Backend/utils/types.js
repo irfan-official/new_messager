@@ -15,6 +15,7 @@ export const modelTypes = {
   video: "Video",
   audio: "Audio",
   views: "Views",
+  friends: "Friends",
   activity: "Activity",
 };
 

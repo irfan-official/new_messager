@@ -53,21 +53,15 @@ const userSchema = new mongoose.Schema(
 
     views: [
       {
-        index: {
-          type: Number,
-          default: 1,
-        },
-        room: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: modelTypes.room, // "Room"
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: modelTypes.views,
       },
     ],
 
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: modelTypes.user,
+        ref: modelTypes.friends,
       },
     ],
 
