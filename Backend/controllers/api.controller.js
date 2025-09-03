@@ -5,7 +5,7 @@ import User from "../models/user.model.js";
 import Group from "../models/group.model.js";
 import Room from "../models/room.model.js";
 import { nanoid } from "nanoid";
-import { modelTypes, roomTypes } from "../models/types.js";
+import { modelTypes, roomTypes } from "../utils/types.js";
 
 export const handleLogin = async (req, res) => {
   const { email, password } = req.body;

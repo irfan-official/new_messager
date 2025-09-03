@@ -7,7 +7,7 @@ import Blocked from "../models/blocked.model.js";
 import Media from "../models/media.model.js";
 import Message from "../models/message.model.js";
 
-import { roomTypes, modelTypes } from "../models/types.js";
+import { roomTypes, modelTypes } from "../utils/types.js";
 import { ReplyMessage, LatestMessage } from "../utils/message.js";
 
 const handleSocket = (socket, io) => {
@@ -21,7 +21,7 @@ const handleSocket = (socket, io) => {
           {
             path: "views.room",
             model: modelTypes.room,
-            select: "type createdByUser createdByGroup lastMessage",
+            select: "type key createdByUser createdByGroup lastMessage",
             populate: [
               {
                 path: "createdByUser",
@@ -59,6 +59,11 @@ const handleSocket = (socket, io) => {
         .select("-password");
 
       socket.emit("allData", userData);
+
+      userData.views.forEach(({ index, room }, idx) => {
+        // console.log("----- roomkey ----", room.key);
+        socket.join(String(room.key));
+      });
     } catch (err) {
       console.error("Error during register:", err);
       socket.emit("error", { message: "Failed to register room." });
@@ -98,17 +103,17 @@ const handleSocket = (socket, io) => {
     );
 
     const latestMessage = new LatestMessage(
-      roomKey, //roomKey  //roomInfo.roomKey = userRoom._id
+      room._id, //roomKey  //roomInfo.roomKey = userRoom._id
       senderUser._id, //senderID
       createdMessage.createdAt, //messageCreationTime
-      createdMessage.message //message
+      message //message
     );
 
     io.to(String(room.key)).emit("reply", replyData);
 
-    io.to(String(roomKey)).emit("latestMessage", latestMessage); // checkGroup._id = cardID for cardType = Group
+    io.to(String(room.key)).emit("latestMessage", latestMessage); // checkGroup._id = cardID for cardType = Group
 
-    io.to(String(roomKey)).emit("unseenMessage", {
+    io.to(String(room.key)).emit("unseenMessage", {
       status: true,
     });
   });
@@ -224,7 +229,7 @@ const handleSocket = (socket, io) => {
             lastMessage: "",
           });
 
-          socket.join(createdRoom.key);
+          socket.join(String(createdRoom.key));
 
           let replyData = {
             roomAllMessages: [],
@@ -232,7 +237,7 @@ const handleSocket = (socket, io) => {
 
           socket.emit("initialReply", replyData);
         } else {
-          socket.join(checkRoom.key);
+          socket.join(String(checkRoom.key));
 
           const allMessages = await UserMessage.find({
             room: checkRoom._id,
@@ -257,8 +262,6 @@ const handleSocket = (socket, io) => {
 
         const checkingBanned = group?.blocked.includes(userID) || false;
 
-        console.log("test ------ 01 ----------------");
-
         if (checkingBanned) {
           const responseError = {
             type: "banned",
@@ -266,8 +269,6 @@ const handleSocket = (socket, io) => {
           };
           return socket.emit("error", responseError);
         }
-
-        console.log("test ------ 02 ----------------");
 
         let checkUserConnectedGroup = false;
 
@@ -278,14 +279,11 @@ const handleSocket = (socket, io) => {
           }
         }
 
-        console.log("test ------ 03 ----------------");
-
         if (!checkUserConnectedGroup) {
           return;
         } else {
-          console.log("test ------ 04 ----------------");
           const room = await Room.findOne({ createdByGroup: group._id });
-          console.log("test ------ 05 ----------------");
+
           const allMessages = await Message.find({
             room: room._id,
           })
@@ -303,8 +301,6 @@ const handleSocket = (socket, io) => {
             ])
             .select("sender message createdAt, updatedAt");
 
-          console.log("test ------ 06 ----------------");
-
           let formateAllMessage = allMessages.map((msg) => {
             return new ReplyMessage(
               room.key, //roomID  //roomID = group._id
@@ -315,8 +311,6 @@ const handleSocket = (socket, io) => {
               msg.createdAt
             );
           });
-
-          console.log("test ------ 07 ----------------");
 
           const replyData = {
             roomAllMessages: formateAllMessage,

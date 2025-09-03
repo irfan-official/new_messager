@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { modelTypes, groupTypes } from "./types.js";
+import { modelTypes, groupTypes } from "../utils/types.js";
 
 const groupSchema = new mongoose.Schema(
   {

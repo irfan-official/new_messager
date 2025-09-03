@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes } from "./types.js";
+import { roomTypes, modelTypes } from "../utils/types.js";
 
 const roomSchema = new mongoose.Schema(
   {

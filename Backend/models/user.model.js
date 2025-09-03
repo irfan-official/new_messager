@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "./types.js";
+import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -70,6 +70,7 @@ const userSchema = new mongoose.Schema(
         ref: modelTypes.user,
       },
     ],
+
     blocked: [
       {
         type: mongoose.Schema.Types.ObjectId,

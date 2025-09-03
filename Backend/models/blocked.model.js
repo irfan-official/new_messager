@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "./types.js";
+import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
 
 const blockedSchema = new mongoose.Schema(
   {

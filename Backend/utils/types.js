@@ -14,6 +14,8 @@ export const modelTypes = {
   image: "Image",
   video: "Video",
   audio: "Audio",
+  views: "Views",
+  activity: "Activity",
 };
 
 export const fileExtentions = {
