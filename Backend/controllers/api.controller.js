@@ -53,21 +53,21 @@ export const handleLogin = async (req, res, next) => {
 };
 
 export const handleRegister = async (req, res, next) => {
-  const { firstName, lastName, email, password, image: imageURL } = req.body;
-
-  console.log("request arrive ==> ", req.body);
-
-  if (!firstName || !lastName || !email || !password || !imageURL) {
-    return res.status(400).json({
-      success: false,
-      error: "All fields are reequired",
-    });
-  }
-
-  let salt = await bcrypt.genSalt();
-  let hashPassword = await bcrypt.hash(password, salt);
-
   try {
+    const { firstName, lastName, email, password, image: imageURL } = req.body;
+
+    console.log("request arrive ==> ", req.body);
+
+    if (!firstName || !lastName || !email || !password || !imageURL) {
+      return res.status(400).json({
+        success: false,
+        error: "All fields are reequired",
+      });
+    }
+
+    let salt = await bcrypt.genSalt();
+    let hashPassword = await bcrypt.hash(password, salt);
+
     const image = await Image.create({
       extentionType: "jpg",
       type: "User",
@@ -110,7 +110,7 @@ export const handleRegister = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("register error:", err);
     return res.status(500).json({
       success: false,
       error: "Internal server error",

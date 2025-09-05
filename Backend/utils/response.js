@@ -1,6 +1,7 @@
 import code from "./statuscode.js";
 
 class Response {
+  // (statusCode, ?message, ?responseData)
   constructor(...params) {
     const statusCode = params[0];
     let message = params[1] || "";

@@ -9,6 +9,11 @@ import Message from "../models/message.model.js";
 
 import { roomTypes, modelTypes } from "../utils/types.js";
 import { ReplyMessage, LatestMessage } from "../utils/message.js";
+import { model } from "mongoose";
+import Views from "../models/views.model.js";
+
+import statusCode from "../utils/statuscode.js";
+import Response from "../utils/response.js";
 
 const handleSocket = (socket, io) => {
   console.log(`connected ${socket.id}`);
@@ -16,53 +21,59 @@ const handleSocket = (socket, io) => {
   socket.on("register", async (data) => {
     const { userID } = data;
     try {
-      const userData = await User.findOne({ _id: userID })
-        .populate([
-          {
-            path: "views.room",
-            model: modelTypes.room,
-            select: "type key createdByUser createdByGroup lastMessage",
-            populate: [
-              {
-                path: "createdByUser",
-                model: modelTypes.user,
-                select: "name image",
-                populate: {
-                  path: "image",
-                  model: modelTypes.image,
-                  select: "url",
-                },
-              },
-              {
-                path: "createdByGroup",
-                model: modelTypes.group,
-                select: "name image",
-                populate: {
-                  path: "image",
-                  model: modelTypes.image,
-                  select: "url",
-                },
-              },
-              {
-                path: "lastMessage",
-                model: modelTypes.message,
-                select: "sender message media createdAt",
-                populate: {
-                  path: "sender",
-                  model: modelTypes.user,
-                  select: "-password",
-                },
-              },
-            ],
-          },
-        ])
+      const user = await User.findOne({ _id: userID })
+        .populate({
+          path: "channels",
+          select: modelTypes.channel,
+          select: "key",
+        })
         .select("-password");
 
-      socket.emit("allData", userData);
+      if (!user) {
+        return resizeBy.status().json(new Response(404));
+      }
 
-      userData.views.forEach(({ index, room }, idx) => {
-        // console.log("----- roomkey ----", room.key);
-        socket.join(String(room.key));
+      let views = await Views.find({
+        user: user._id,
+      }).populate([
+        {
+          path: "card",
+          model: modelTypes.card,
+          populate: [
+            {
+              path: "createdByUser",
+              model: modelTypes.user,
+              select: "image name",
+            },
+            {
+              path: "createdByGroup",
+              model: modelTypes.group,
+              select: "image name",
+            },
+          ],
+        },
+        {
+          path: "channel",
+          model: modelTypes.channel,
+          select: "key lastMessage",
+          populate: {
+            select: "lastMessage",
+            model: modelTypes.message,
+            select: "message createdAt",
+          },
+        },
+      ]);
+
+      const indexFilterViews = views.sort((a, b) => a.index - b.index);
+
+      const responseDataStructure = {
+        views: indexFilterViews,
+      };
+
+      socket.emit("allData", responseDataStructure);
+
+      user.channels.forEach((channel, idx) => {
+        socket.join(String(channel.key));
       });
     } catch (err) {
       console.error("Error during register:", err);

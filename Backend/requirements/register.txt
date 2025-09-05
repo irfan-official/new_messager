@@ -1,0 +1,23 @@
+
+
+
+
+find the user based on userID
+
+
+< --------------------------------------------------------   >
+
+check the user.views  populate it 
+
+
+sort the user.views array based on user.views.index
+
+send to the user
+
+
+<---------------------------------------------------------------->
+
+check the user.channels
+
+join user with all communication channels
+
