@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
+import { modelTypes } from "../utils/types.js";
 
 const messageSchema = new mongoose.Schema(
   {
@@ -9,9 +9,9 @@ const messageSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    room: {
+    channel: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: modelTypes.room,
+      ref: modelTypes.channel,
       required: true,
     },
     sender: {

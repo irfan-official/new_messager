@@ -1,0 +1,4 @@
+Every user have a card
+Every group have a card
+Every card have a communication channel
+

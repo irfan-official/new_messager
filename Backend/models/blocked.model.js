@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
+import { cardTypes, modelTypes } from "../utils/types.js";
 
 const blockedSchema = new mongoose.Schema(
   {
     type: {
       type: String,
       // enum: ["Blocked_Group_By_User", "Blocked_User_By_User", "Blocked_User_By_Group"],
-      enum: [roomTypes.user, roomTypes.group],
+      enum: [cardTypes.user, cardTypes.group],
       required: true,
       trim: true,
     },

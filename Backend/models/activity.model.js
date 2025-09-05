@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
+import { modelTypes, fileExtentions } from "../utils/types.js";
 
 const activitySchema = new mongoose.Schema({}, { timestamps: true });
 

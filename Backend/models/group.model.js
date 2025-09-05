@@ -24,9 +24,9 @@ const groupSchema = new mongoose.Schema(
       maxlength: 60,
     },
 
-    room: {
+    card: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: modelTypes.room,
+      ref: modelTypes.card,
     },
 
     creator: {

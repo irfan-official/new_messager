@@ -1,4 +1,4 @@
-export const roomTypes = {
+export const cardTypes = {
   user: "User",
   group: "Group",
   private: "Private",
@@ -8,7 +8,8 @@ export const modelTypes = {
   blocked: "Blocked",
   group: "Group",
   user: "User",
-  room: "Room",
+  card: "Card",
+  channel: "Channel",
   message: "Message",
   media: "Media",
   image: "Image",

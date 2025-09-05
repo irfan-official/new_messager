@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
+import { modelTypes, fileExtentions } from "../utils/types.js";
 
 /// if allUsers are active then group is active
 const mediaSchema = new mongoose.Schema(

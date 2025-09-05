@@ -287,7 +287,7 @@ export const searchRoomCards = async (req, res, next) => {
     name: searchValue,
   });
 
-  return res.status(200).json(new Response(200, _, cards));
+  return res.status(200).json(new Response(200, cards));
 };
 
 export const clickedRoomCard = async (req, res, next) => {

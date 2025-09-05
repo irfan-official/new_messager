@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { roomTypes, modelTypes, fileExtentions } from "../utils/types.js";
+import { modelTypes } from "../utils/types.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+    },
+    card: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: modelTypes.card,
     },
     name: {
       type: "String",
