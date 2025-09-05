@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
-    card: {
+    defaultCard: {
       type: mongoose.Schema.Types.ObjectId,
       ref: modelTypes.card,
     },

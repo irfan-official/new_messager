@@ -17,6 +17,11 @@ const viewsSchema = new mongoose.Schema(
       ref: modelTypes.card,
       required: true,
     },
+    channel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: modelTypes.channel,
+      required: true,
+    },
     lastCheckInTime: {
       type: Date,
       default: Date.now,

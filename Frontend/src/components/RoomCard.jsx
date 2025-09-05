@@ -56,14 +56,18 @@ function RoomCard({
 
   useEffect(() => {
     socket.on("latestMessage", (data) => {
+
+
       if (String(roomID) === String(data.roomID)) {
+
         setLatestMessageSenderID(data.senderID);
         setLatestMessage(data.message);
+
         setDisplayCurrentMessageTime(data.time);
         setMessageStatus((prev) => (prev != "NEW" ? "NEW" : prev));
       }
     });
-  }, []);
+  }, [latestMessage, latestMessageSenderID]);
 
   function isClickedR() {
     return click.roomID === roomID ? true : false;
@@ -137,7 +141,7 @@ function RoomCard({
         </div>
         <div className="__last_message__ w-full h-[40%] flex items-center justify-start pl-2.5">
           <h5
-            className={`text-[0.7rem] ${
+            className={`text-[0.7rem] truncate text${
               messageStatus != "OLD"
                 ? isNewer
                   ? "text-orange-500 font-semibold"
@@ -146,7 +150,7 @@ function RoomCard({
             }`}
           >
             {String(userID) === String(latestMessageSenderID) ? "You: " : ""}
-            {editMessage(latestMessage)}
+            {latestMessage}
           </h5>
         </div>
       </div>

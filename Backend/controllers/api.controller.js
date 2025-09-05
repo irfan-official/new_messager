@@ -10,7 +10,7 @@ import Views from "../models/views.model.js";
 import Activity from "../models/activity.model.js";
 import Blocked from "../models/blocked.model.js";
 import { nanoid } from "nanoid";
-import { modelTypes, roomTypes } from "../utils/types.js";
+import { modelTypes, roomTypes, groupTypes } from "../utils/types.js";
 import Response from "../utils/response.js";
 
 export const handleLogin = async (req, res, next) => {
@@ -93,8 +93,13 @@ export const handleRegister = async (req, res, next) => {
 
     const channel = await Channel.create({
       key: String(user._id),
-      card: card._id,
+      type: cardTypes.user,
+      users: [user._id],
     });
+
+    user.channels = [channel._id];
+    user.defaultCard = card._id;
+    await user.save();
 
     assignJWT(res, user._id);
 
@@ -159,30 +164,39 @@ export const handleCreateGroup = async (req, res, next) => {
     const group = await Group.create({
       name,
       image: image._id,
-      //room:
       creator: user._id,
       active: true,
-      type: "Public",
-      members: [userID],
+      type: groupTypes.public,
+      members: [user._id],
+      admins: [user._id],
     });
 
     image.group = group._id;
     await image.save();
 
-    const createdRoom = await Room.create({
-      key: String(group._id),
-      type: roomTypes.group,
+    const card = await Card.create({
+      type: cardTypes.group,
       createdByGroup: group._id,
-      admins: [user._id],
     });
 
-    group.room = createdRoom._id;
-    await group.save();
-
-    user.views.push({
-      index: user.views.length + 1,
-      room: createdRoom._id,
+    const channel = await Card.create({
+      key: String(group._id),
+      type: cardTypes.group,
+      group: group._id,
     });
+
+    const checkView = await Views.find({ user: user._id });
+
+    //create a view
+    const createdView = await Views.create({
+      user: user._id,
+      index: (checkView?.length || 0) + 1,
+      card: card._id,
+      channel: channel._id,
+    });
+
+    user.views = [...user.views, createdView._id];
+    user.channels = [...user.channels, channel._id];
     await user.save();
 
     res.status(200).json({

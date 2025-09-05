@@ -53,6 +53,7 @@ const groupSchema = new mongoose.Schema(
       enum: [true, false],
       default: false,
     },
+    
     type: {
       type: String,
       enum: [
