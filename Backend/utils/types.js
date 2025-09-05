@@ -1,7 +1,6 @@
 export const cardTypes = {
   user: "User",
   group: "Group",
-  private: "Private",
 };
 
 export const modelTypes = {

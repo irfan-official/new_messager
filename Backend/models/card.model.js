@@ -23,6 +23,28 @@ const cardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+cardSchema.pre("save", async function name(next) {
+  try {
+    if (this.type === cardTypes.user) {
+      if (!this.createdByUser) {
+        return next(
+          new Error("User ID is required for User type in card model")
+        );
+      }
+    }
+
+    if (this.type === cardTypes.group) {
+      if (!this.createdByGroup) {
+        return next(
+          new Error("Group ID is required for Group type in card model")
+        );
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 const Card = mongoose.model(modelTypes.card, cardSchema);
 
 export default Card;

@@ -34,6 +34,20 @@ const groupSchema = new mongoose.Schema(
       ref: modelTypes.user,
       required: true,
     },
+
+    groupOwner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: modelTypes.user,
+    },
+
+    admins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: modelTypes.user,
+        required: true,
+      },
+    ],
+
     active: {
       type: Boolean,
       enum: [true, false],
@@ -73,6 +87,11 @@ const groupSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+groupSchema.pre("save", async function name(next) {
+  this.groupOwner = this.creator;
+});
+
 const Group = mongoose.model(modelTypes.group, groupSchema);
 
 export default Group;

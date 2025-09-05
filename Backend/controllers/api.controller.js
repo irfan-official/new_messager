@@ -3,7 +3,9 @@ import bcrypt from "bcrypt";
 import { image as Image } from "../models/media.model.js";
 import User from "../models/user.model.js";
 import Group from "../models/group.model.js";
-import Room from "../models/room.model.js";
+import Room from "../models/room.model.js"; // check it
+import Card from "../models/card.model.js";
+import Channel from "../models/channel.model.js";
 import Views from "../models/views.model.js";
 import Activity from "../models/activity.model.js";
 import Blocked from "../models/blocked.model.js";
@@ -83,6 +85,16 @@ export const handleRegister = async (req, res, next) => {
 
     image.user = user._id;
     await image.save();
+
+    const card = await Card.create({
+      type: cardTypes.user,
+      createdByUser: user._id,
+    });
+
+    const channel = await Channel.create({
+      key: String(user._id),
+      card: card._id,
+    });
 
     assignJWT(res, user._id);
 

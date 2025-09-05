@@ -62,6 +62,13 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    channels: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: modelTypes.channel,
+      },
+    ],
+
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,

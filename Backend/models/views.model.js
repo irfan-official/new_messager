@@ -12,9 +12,9 @@ const viewsSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
-    room: {
+    card: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: modelTypes.room,
+      ref: modelTypes.card,
       required: true,
     },
     lastCheckInTime: {

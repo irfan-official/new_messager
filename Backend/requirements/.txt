@@ -2,3 +2,8 @@ Every user have a card
 Every group have a card
 Every card have a communication channel
 
+
+When a user create an account then a card type User will be created, when card is created then a communicationChannel will be created
+
+when a user create a group the a card type Group will be created, when card is created then a communicationChannel will be created
+
